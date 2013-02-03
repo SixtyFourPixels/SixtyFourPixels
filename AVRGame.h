@@ -6,7 +6,7 @@
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
 
-#define NUM_GAMES 5 // change this number to have move games in the menu
+#define NUM_GAMES 6 // change this number to have move games in the menu
 
 // define the pins for the matrix columns
 #define P_COL7  14

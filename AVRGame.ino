@@ -21,6 +21,7 @@
 #include "BlocksGame.h"
 #include "FourInARowGame.h"
 #include "MemoryGame.h"
+#include "SnakeGame.h"
 
 // Global variables
 CGame *pGame = NULL;
@@ -62,6 +63,7 @@ void getMenuIcon(int which, byte *dst, byte count)
     case 2: CBreakoutGame::getGameIcon(dst, count); break;
     case 3: CFourInARowGame::getGameIcon(dst, count); break;
     case 4: CMemoryGame::getGameIcon(dst, count); break;
+    case 5: CSnakeGame::getGameIcon(dst, count); break;
     // END LIST OF GAMES
     
     default: CMenu::getGameIcon(dst, count); break; // Last item is the sound toggle
@@ -82,6 +84,7 @@ void startGame(int which)
     case 2: pGame = new CBreakoutGame(); break;
     case 3: pGame = new CFourInARowGame(); break;
     case 4: pGame = new CMemoryGame(); break;
+    case 5: pGame = new CSnakeGame(); break;
     // END LIST OF GAMES
     
     default: pGame =new CMenu(); which = NUM_GAMES; break;
