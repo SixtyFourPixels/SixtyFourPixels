@@ -4,6 +4,8 @@
 /////////
 /////////
 /////////   S N A K E     G A M E 
+/////////   
+/////////      By Stephen Cropp
 /////////
 /////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -106,11 +108,20 @@ class CSnakeGame : public CGame
 	      Disp8x8.set(Y, X, DISP_GREEN);
 	      planted = -1;
 	   	}
+        playSound(500,100);
 	  }
 	}
     
     void newLevel()
     {
+      playSound(500,100);
+      Disp8x8.delayWithRefresh(30);
+      playSound(600,100);
+      Disp8x8.delayWithRefresh(30);
+      playSound(700,100);
+      Disp8x8.delayWithRefresh(30);
+      playSound(800,100);
+      Disp8x8.delayWithRefresh(30);
       Disp8x8.cls();
 	  Timer1Period -= 10;
       snakeTail = snakeHead > 1 ? snakeHead - 2 : snakeHead = 0 ? 62 : 63;
@@ -146,9 +157,6 @@ class CSnakeGame : public CGame
       {
         case EV_PRESS_B:
         	rot = 1;
-        	break;
-        case EV_PRESS_C:
-        	grow = 1;
         	break;
         case EV_PRESS_D:
 			rot = -1;
@@ -201,6 +209,13 @@ class CSnakeGame : public CGame
 			if(Disp8x8.get(snakeY[snakeHead], snakeX[snakeHead]) == DISP_RED)
 			{
 			 	Disp8x8.set(snakeY[snakeHead], snakeX[snakeHead], DISP_YELLOW);
+    	        playSound(400,100);
+      Disp8x8.delayWithRefresh(30);
+    	        playSound(300,100);
+      Disp8x8.delayWithRefresh(30);
+    	        playSound(200,100);
+      Disp8x8.delayWithRefresh(30);
+    	        playSound(100,100);
                 endGame();
 			}
 			else if(Disp8x8.get(snakeY[snakeHead], snakeX[snakeHead]) == DISP_GREEN)
