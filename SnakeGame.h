@@ -165,6 +165,7 @@ class CSnakeGame : public CGame
 			//collision detect
 			if(Disp8x8.get(snakeY[snakeHead], snakeX[snakeHead]) == DISP_RED)
 			{
+			 	Disp8x8.set(snakeY[snakeHead], snakeX[snakeHead], DISP_YELLOW);
                 endGame();
 			}
 			else
