@@ -82,17 +82,54 @@ class CSnakeGame : public CGame
     char grow;
     char rot;
     char hdg;
+    char level;
+    char treeCount;
     
     //score == gameScore
     
     // Grid disp8x8 snake red
     // Level disp8x8 plants green
+
+	void plantTree()
+	{
+	  treeCount++;
+	  if (treeCount == level) newLevel();
+	  char planted = 0;
+	  char X = 0;
+	  char Y = 0;
+	  while (!planted)
+	  {
+	    X = random(8);
+	    Y = random(8);
+	    if (Disp8x8.get(Y, X) != DISP_RED)
+	   	{
+	      Disp8x8.set(Y, X, DISP_GREEN);
+	      planted = -1;
+	   	}
+	  }
+	}
+    
+    void newLevel()
+    {
+      Disp8x8.cls();
+	  Timer1Period -= 10;
+      snakeTail = snakeHead > 1 ? snakeHead - 2 : snakeHead = 0 ? 62 : 63;
+      level++;
+      treeCount = 0;
+	  plantTree();
+    }
     
     void init()
     {
-      Timer1Period = 200;
+      Disp8x8.cls();
+      Timer1Period = 300;
       count=0;
-      speed=1;
+      speed=200;
+      hdg=0;
+      rot=0;
+      grow=0;
+	  level=4;
+      newLevel();
       for(byte i=0;i<64;i++)
       	{
       	snakeX[i]=0; snakeY[i]=0;
@@ -101,8 +138,6 @@ class CSnakeGame : public CGame
       snakeTail=0;
       snakeX[snakeHead]=2; snakeY[snakeHead]=4;
       snakeX[snakeTail]=0; snakeY[snakeTail]=4;
-      
-      Disp8x8.cls();
     }
 
     void handleEvent(char event)
@@ -168,12 +203,16 @@ class CSnakeGame : public CGame
 			 	Disp8x8.set(snakeY[snakeHead], snakeX[snakeHead], DISP_YELLOW);
                 endGame();
 			}
+			else if(Disp8x8.get(snakeY[snakeHead], snakeX[snakeHead]) == DISP_GREEN)
+			{
+			  grow = 1;
+			  plantTree();
+			}
 			else
 			{
          		Disp8x8.set(snakeY[snakeHead], snakeX[snakeHead], DISP_YELLOW);
         		gameScore += snakeHead - snakeTail;
 			}
-
       		break;
       }
     }
