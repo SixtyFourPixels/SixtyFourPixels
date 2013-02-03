@@ -88,7 +88,6 @@ class CSnakeGame : public CGame
     // Grid disp8x8 snake red
     // Level disp8x8 plants green
     
-    // score
     void init()
     {
       Timer1Period = 200;
@@ -120,6 +119,19 @@ class CSnakeGame : public CGame
 			rot = -1;
 			break;
         case EV_TIMER_1:
+	  		// move tail
+			if(grow)
+			{
+      		gameScore += 100;			
+			grow--;
+			}
+			else
+			{
+	      		Disp8x8.set(snakeY[snakeTail], snakeX[snakeTail], DISP_OFF);
+    	  		snakeTailOld = snakeTail;
+      			snakeTail = snakeTail < 63 ? snakeTail + 1 : 0;
+      		}
+      		
 			// move head
     	  	Disp8x8.set(snakeY[snakeHead], snakeX[snakeHead], DISP_RED);
     	    snakeHeadOld = snakeHead;
@@ -150,19 +162,17 @@ class CSnakeGame : public CGame
       			snakeY[snakeHead]=snakeY[snakeHeadOld]>0?snakeY[snakeHeadOld]-1:7;
       			break;
 			}
-      		Disp8x8.set(snakeY[snakeHead], snakeX[snakeHead], DISP_YELLOW);
-
-	  		// move tail
-			if(grow)
+			//collision detect
+			if(Disp8x8.get(snakeY[snakeHead], snakeX[snakeHead]) == DISP_RED)
 			{
-			grow--;
+                endGame();
 			}
 			else
 			{
-	      		Disp8x8.set(snakeY[snakeTail], snakeX[snakeTail], DISP_OFF);
-    	  		snakeTailOld = snakeTail;
-      			snakeTail = snakeTail < 63 ? snakeTail + 1 : 0;
-      		}
+         		Disp8x8.set(snakeY[snakeHead], snakeX[snakeHead], DISP_YELLOW);
+        		gameScore += snakeHead - snakeTail;
+			}
+
       		break;
       }
     }
