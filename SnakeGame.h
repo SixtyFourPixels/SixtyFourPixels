@@ -95,7 +95,7 @@ class CSnakeGame : public CGame
 	void plantTree()
 	{
 	  treeCount++;
-	  if (treeCount == level) newLevel();
+	  if (treeCount == level+5) newLevel();
 	  char planted = 0;
 	  char X = 0;
 	  char Y = 0;
@@ -123,7 +123,7 @@ class CSnakeGame : public CGame
       playSound(800,100);
       Disp8x8.delayWithRefresh(30);
       Disp8x8.cls();
-	  Timer1Period -= 10;
+	  Timer1Period -= 5;
       snakeTail = snakeHead > 1 ? snakeHead - 2 : snakeHead = 0 ? 62 : 63;
       level++;
       treeCount = 0;
@@ -210,16 +210,17 @@ class CSnakeGame : public CGame
 			{
 			 	Disp8x8.set(snakeY[snakeHead], snakeX[snakeHead], DISP_YELLOW);
     	        playSound(400,100);
-      Disp8x8.delayWithRefresh(30);
+                Disp8x8.delayWithRefresh(30);
     	        playSound(300,100);
-      Disp8x8.delayWithRefresh(30);
+                Disp8x8.delayWithRefresh(30);
     	        playSound(200,100);
-      Disp8x8.delayWithRefresh(30);
+                Disp8x8.delayWithRefresh(30);
     	        playSound(100,100);
                 endGame();
 			}
 			else if(Disp8x8.get(snakeY[snakeHead], snakeX[snakeHead]) == DISP_GREEN)
 			{
+ 			  Disp8x8.set(snakeY[snakeHead], snakeX[snakeHead], DISP_YELLOW);
 			  grow = 1;
 			  plantTree();
 			}
