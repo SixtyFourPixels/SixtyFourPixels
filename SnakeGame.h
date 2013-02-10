@@ -123,17 +123,19 @@ class CSnakeGame : public CGame
       playSound(800,100);
       Disp8x8.delayWithRefresh(30);
       Disp8x8.cls();
-	  Timer1Period -= 5;
+	  Timer1Period -= 10;
       snakeTail = snakeHead > 1 ? snakeHead - 2 : snakeHead = 0 ? 62 : 63;
-      level++;
+  	  Disp8x8.set(snakeY[snakeHead], snakeX[snakeHead], DISP_RED);
+  	  Disp8x8.set(snakeY[snakeHead-1], snakeX[snakeHead-1], DISP_RED);
+//  	  Disp8x8.set(snakeY[snakeHead-2], snakeX[snakeHead-2], DISP_RED);
+  	  level++;
       treeCount = 0;
 	  plantTree();
     }
     
     void init()
     {
-      Disp8x8.cls();
-      Timer1Period = 300;
+      Timer1Period = 250;
       count=0;
       speed=200;
       hdg=0;
@@ -141,6 +143,8 @@ class CSnakeGame : public CGame
       grow=0;
 	  level=4;
       newLevel();
+      Disp8x8.cls();
+      
       for(byte i=0;i<64;i++)
       	{
       	snakeX[i]=0; snakeY[i]=0;
@@ -149,6 +153,7 @@ class CSnakeGame : public CGame
       snakeTail=0;
       snakeX[snakeHead]=2; snakeY[snakeHead]=4;
       snakeX[snakeTail]=0; snakeY[snakeTail]=4;
+   	  plantTree();
     }
 
     void handleEvent(char event)
