@@ -5,6 +5,11 @@
 //// 
 //// The main sketch file for the AVRGAME project
 //// 
+//// FIRMWARE RELEASES
+//// 
+//// Rev 1.0 27jan13 Initial release
+//// Rev 1.1 10feb13 Bug fixes
+////
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
 
@@ -15,19 +20,27 @@
 #include "AVRGame.h"
 #include "Menu.h"
 
-// Include all game headers here
+///////////////////////////////////////////////////////////////////////////
+//
+// include games here
+//
 #include "InvadersGame.h"
 #include "BreakoutGame.h"
-#include "BlocksGame.h"
 #include "FourInARowGame.h"
 #include "MemoryGame.h"
 #include "SnakeGame.h"
+//
+///////////////////////////////////////////////////////////////////////////
+
 
 // Global variables
-CGame *pGame = NULL;
 Disp8x8Class Disp8x8;
+CGameFactory *gameFactory[MAX_GAMES] = {0};
+byte numGameFactories = 0;
+CGame *pGame = NULL;
 Tone speaker;
 byte soundOn = 0;
+char thisGame = -1;
 char nextGame = -1;
 byte heartbeat = 0;
 unsigned long gameScore;
@@ -55,41 +68,22 @@ unsigned int Timer5Period;
 void getMenuIcon(int which, byte *dst, byte count)
 {
   memset(dst,0,16);
-  switch(which)
-  {
-    // BEGIN LIST OF GAMES
-    case 0: CInvadersGame::getGameIcon(dst, count); break;
-    case 1: CBlocksGame::getGameIcon(dst, count); break;
-    case 2: CBreakoutGame::getGameIcon(dst, count); break;
-    case 3: CFourInARowGame::getGameIcon(dst, count); break;
-    case 4: CMemoryGame::getGameIcon(dst, count); break;
-    case 5: CSnakeGame::getGameIcon(dst, count); break;
-    // END LIST OF GAMES
-    
-    default: CMenu::getGameIcon(dst, count); break; // Last item is the sound toggle
-  }
+  if(which>=numGameFactories)
+    which=0;
+  gameFactory[which]->getGameIcon(dst, count);
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // startGame
-// Creates an instance of a game class and starts it running. The list of games
-// defined here must match the list in the getMenuIcon function
-void startGame(int which)
+// Creates an instance of a game class and starts it running
+void startGame(byte which)
 {
-  switch(which)
-  {
-    // BEGIN LIST OF GAMES
-    case 0: pGame = new CInvadersGame(); break;
-    case 1: pGame = new CBlocksGame(); break;
-    case 2: pGame = new CBreakoutGame(); break;
-    case 3: pGame = new CFourInARowGame(); break;
-    case 4: pGame = new CMemoryGame(); break;
-    case 5: pGame = new CSnakeGame(); break;
-    // END LIST OF GAMES
-    
-    default: pGame =new CMenu(); which = NUM_GAMES; break;
-  }    
-  EEPROM.write(EEPROM_GAMESELECTED,which);
+
+  if(which>=numGameFactories)
+    which=0;
+  thisGame = which;
+  EEPROM.write(EEPROM_GAMESELECTED,thisGame);
+  pGame = gameFactory[thisGame]->createInstance();
   
   nextTimer1Event = 0;
   nextTimer2Event = 0;
@@ -296,6 +290,7 @@ void setup()
   digitalWrite(P_BUTB, HIGH);
   digitalWrite(P_BUTC, HIGH);
   digitalWrite(P_BUTD, HIGH);
+  digitalWrite(P_LED, HIGH);
   
   // initialise sound handling
   initSound();
@@ -326,7 +321,7 @@ void loop()
   
   // Check for buttons A and C being held together for 1 second. This
   // combination returns to the menu
-  if(digitalRead(P_BUTA) == LOW && digitalRead(P_BUTC) == LOW) 
+  if(digitalRead(P_BUTA) == LOW && digitalRead(P_BUTC) == LOW && thisGame > 0) 
   {
     if(!menuSelectKeyPressed) 
     {
@@ -334,7 +329,7 @@ void loop()
     }
     else if(milliseconds > menuSelectKeyPressed)
     {
-      setNextGame(NUM_GAMES); // select the last game, which is always the menu handler
+      setNextGame(0); // select the menu handler
     }
   }  
   else
