@@ -28,8 +28,10 @@
 #include "BreakoutGame.h"
 #include "FourInARowGame.h"
 #include "MemoryGame.h"
+#include "SnakeGame.h"
 //
 ///////////////////////////////////////////////////////////////////////////
+
 
 // Global variables
 Disp8x8Class Disp8x8;
@@ -76,6 +78,7 @@ void getMenuIcon(int which, byte *dst, byte count)
 // Creates an instance of a game class and starts it running
 void startGame(byte which)
 {
+
   if(which>=numGameFactories)
     which=0;
   thisGame = which;
