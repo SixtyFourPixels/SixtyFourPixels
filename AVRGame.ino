@@ -9,6 +9,7 @@
 //// 
 //// Rev 1.0 27jan13 Initial release
 //// Rev 1.1 10feb13 Bug fixes
+//// Rev 2.0 06mar13 Display dimming, Display invert, 8-bits per pixel mode
 ////
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
@@ -16,6 +17,9 @@
 #include <Arduino.h>
 #include <Tone.h>
 #include <EEPROM.h>
+
+#define VERSION_HI 2
+#define VERSION_LO 0
 
 #include "AVRGame.h"
 #include "Menu.h"
@@ -225,8 +229,7 @@ void showScore(unsigned long n)
       else
         Disp8x8.red[j+1] = (b0<<q)|(b1>>(8-q));
     }
-    for(j=0;j<50;++j)
-      Disp8x8.refresh();
+    Disp8x8.delayWithRefresh(100);
   }  
 }
 
@@ -246,15 +249,17 @@ void endGame()
   {
     for(k=0; k<5; ++k)
     {
-      for(j=0;j<100;++j)
-        Disp8x8.refresh();
-      delay(200);
+      Disp8x8.delayWithRefresh(300);
+      delay(300);
     }
+    byte *buffer8 = Disp8x8.setBuffer8(NULL);
     showScore(gameScore);
+    Disp8x8.setBuffer8(buffer8);
     memcpy(Disp8x8.red,red,8);
     memcpy(Disp8x8.green,green,8);
   }
 }
+
 
 ///////////////////////////////////////////////////////////////////////////
 // setTimeOut
@@ -291,6 +296,9 @@ void setup()
   digitalWrite(P_BUTC, HIGH);
   digitalWrite(P_BUTD, HIGH);
   digitalWrite(P_LED, HIGH);
+
+//  IRLink.init();
+//  Disp8x8.invert = IRLink.enabled;
   
   // initialise sound handling
   initSound();
@@ -298,6 +306,7 @@ void setup()
   // the last selected game is started (or menu if not valid)
   byte which = EEPROM.read(EEPROM_GAMESELECTED);
   startGame(which);
+  
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -308,11 +317,27 @@ void loop()
   byte event = 0;
   unsigned long milliseconds = millis();
 
+  byte buttonA, buttonB, buttonC, buttonD;
+  if(!Disp8x8.invert)
+  {
+    buttonA = !digitalRead(P_BUTA);
+    buttonB = !digitalRead(P_BUTB);
+    buttonC = !digitalRead(P_BUTC);
+    buttonD = !digitalRead(P_BUTD);
+  }
+  else
+  {
+    buttonA = !digitalRead(P_BUTD);
+    buttonB = !digitalRead(P_BUTC);
+    buttonC = !digitalRead(P_BUTB);
+    buttonD = !digitalRead(P_BUTA);
+  }
+
   // We use the milliseconds until first button press after startup to give us some random
   // number entropy
   if(firstButtonPress)
   {
-    if(digitalRead(P_BUTA) == LOW || digitalRead(P_BUTB) == LOW || digitalRead(P_BUTC) == LOW || digitalRead(P_BUTD) == LOW)
+    if(buttonA || buttonB || buttonC || buttonD)
     { 
       randomSeed(milliseconds);
       firstButtonPress = 0;
@@ -321,7 +346,7 @@ void loop()
   
   // Check for buttons A and C being held together for 1 second. This
   // combination returns to the menu
-  if(digitalRead(P_BUTA) == LOW && digitalRead(P_BUTC) == LOW && thisGame > 0) 
+  if(buttonA && buttonC && thisGame > 0) 
   {
     if(!menuSelectKeyPressed) 
     {
@@ -338,7 +363,7 @@ void loop()
   }
  
   // Poll and debounce button A
-  if(digitalRead(P_BUTA) == LOW) 
+  if(buttonA) 
   {
     if(!timeButtonAPress)
     {      
@@ -353,7 +378,7 @@ void loop()
   }
   
   // Poll and debounce button B
-  if(digitalRead(P_BUTB) == LOW) 
+  if(buttonB) 
   {
     if(!timeButtonBPress)
     {
@@ -368,7 +393,7 @@ void loop()
   }
 
   // Poll and debounce button C
-  if(digitalRead(P_BUTC) == LOW) 
+  if(buttonC) 
   {
     if(!timeButtonCPress)
     {
@@ -383,7 +408,7 @@ void loop()
   }
 
   // Poll and debounce button D
-  if(digitalRead(P_BUTD) == LOW) 
+  if(buttonD) 
   {
     if(!timeButtonDPress)
     {
@@ -397,7 +422,6 @@ void loop()
       pGame->handleEvent(EV_RELEASE_D);
   }
   
-
   // Check whether timer events 1..5 are due
   if(Timer1Period && nextTimer1Event < milliseconds)
   {
@@ -432,6 +456,7 @@ void loop()
   // currently running game. This is used by the menu
   if(nextGame >= 0)
   {
+    Disp8x8.setBuffer8(NULL);
     delete pGame;
     pGame = NULL;
     startGame(nextGame);
